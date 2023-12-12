@@ -20,7 +20,7 @@ public interface EmployeeService {
 	Page<EmployeeResponseDTO> getAllEmployeesPaged(int page, int size);
 
 
-	Page<EmployeeResponseDTO> getAllEmployeespaginationandSorting(int page, int size, String field);
+	 Page<EmployeeResponseDTO> getAllEmployeesPaginationAndSorting(int page, int size, String field);
 
 	EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO);
 

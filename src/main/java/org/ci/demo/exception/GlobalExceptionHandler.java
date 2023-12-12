@@ -9,8 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(Exception.class)
@@ -26,12 +27,10 @@ public class GlobalExceptionHandler {
 	}
 	
 	
-	@ExceptionHandler(DuplicateEntityException.class)
-	public ResponseEntity<String> handleDuplicateEntityException(DuplicateEntityException e) {
-		return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+	@ExceptionHandler(EmployeeNotFoundException.class)
+	public ResponseEntity<String> handleDuplicateEntityException(EmployeeNotFoundException e) {
+		return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
 	}
-	
-	
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
@@ -41,9 +40,6 @@ public class GlobalExceptionHandler {
 		});
 		return new ResponseEntity<>(errorMap,HttpStatus.BAD_REQUEST);
 	}
-	
-	
 
-	
 }
 

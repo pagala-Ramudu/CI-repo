@@ -1,15 +1,18 @@
 package org.ci.demo.serviceImpl;
 
 
-
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.ci.demo.dto.EmployeeRequestDTO;
 import org.ci.demo.dto.EmployeeResponseDTO;
 import org.ci.demo.entity.Employee;
 import org.ci.demo.exception.DuplicateEntityException;
+import org.ci.demo.exception.EmployeeNotFoundException;
 import org.ci.demo.exception.ResourceNotFoundException;
+import org.ci.demo.helper.EmployeeHelper;
 import org.ci.demo.repository.EmployeeRepository;
 import org.ci.demo.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
@@ -23,52 +26,49 @@ import org.springframework.stereotype.Service;
 public class EmployeeServiceImpl implements EmployeeService {
 
 	@Autowired
-	private  EmployeeRepository employeeRepository;
+	private EmployeeRepository employeeRepository;
 
 	//method to save employee in DB
 	@Override
 	public EmployeeResponseDTO createEmployee(EmployeeRequestDTO requestDTO) throws DuplicateEntityException {
+		// Check for duplicate email or phone number
+		checkForDuplicateEmail(requestDTO.getEmail());
+		checkForDuplicatePhoneNumber(requestDTO.getPhoneNumber());
 
-		if (employeeRepository.existsByEmail(requestDTO.getEmail())) {
-			// Handle duplicate email
-			// You can throw an exception or return an appropriate response
-			throw new DuplicateEntityException("email is already present");
-		}
-
-		if (employeeRepository.existsByPhoneNumber(requestDTO.getPhoneNumber())) {
-			// Handle duplicate phoneNumber
-			// You can throw an exception or return an appropriate response
-			throw new DuplicateEntityException("PhoneNumber is already present");
-
-		}
-
+		//create employee object and copy properties from requestDTO to employee
 		Employee employee = new Employee();
 		BeanUtils.copyProperties(requestDTO, employee);
+
+		//save an employee into DB
 		Employee savedEmployee = employeeRepository.save(employee);
-		EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
-		BeanUtils.copyProperties(savedEmployee, responseDTO);
-		return responseDTO;
+		return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
 	}
 
 	//get employee by id method
 	@Override
 	public EmployeeResponseDTO getEmployeeById(Long id) {
+		//fetch employee data from the DB by employee id
 		Employee employee = employeeRepository.findById(id)
+				//throw an exception if employee is not present
 				.orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
-		EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
-		BeanUtils.copyProperties(employee, responseDTO);
-		return responseDTO;
+		//return employeeResponseDTO
+		return EmployeeHelper.mapEmployeeToResponseDTO(employee);
 	}
 
 	//method to get list of employees
 	@Override
 	public List<EmployeeResponseDTO> getAllEmployees() {
+		//fetch list of employees data from DB
 		List<Employee> employees = employeeRepository.findAll();
+
+		// Handle the case where no employees are present, for example, return an empty list
+		if (employees == null || employees.isEmpty()) {
+			return Collections.emptyList();
+		}
+		//convert the employee to employeeResponseDTO and return the list of employees
 		return employees.stream()
 				.map(employee -> {
-					EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
-					BeanUtils.copyProperties(employee, responseDTO);
-					return responseDTO;
+					return EmployeeHelper.mapEmployeeToResponseDTO(employee);
 				})
 				.collect(Collectors.toList());
 	}
@@ -77,54 +77,69 @@ public class EmployeeServiceImpl implements EmployeeService {
 	@Override
 	public Page<EmployeeResponseDTO> getAllEmployeesPaged(int page, int size) {
 		Page<Employee> employeesPage = employeeRepository.findAll(PageRequest.of(page, size));
-		return employeesPage.map(employee -> {
-			EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
-			BeanUtils.copyProperties(employee, responseDTO);
-			return responseDTO;
-		});
+
+		if (employeesPage == null || employeesPage.isEmpty()) {
+			// Return an empty page
+			return Page.empty();
+		}
+		//return page of employees
+		return EmployeeHelper.mapEmployeePageToResponsePage(employeesPage);
 	}
 
-
-	//method to implement sorting and pagination
+	//method to implement pagination and sorting
 	@Override
-	public Page<EmployeeResponseDTO> getAllEmployeespaginationandSorting(int page, int size, String field) {
-		Page<Employee> employees = employeeRepository.findAll(PageRequest.of(page, size).withSort(Sort.by(field)));
-		return employees
-				.map(employee -> {
-					EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
-					BeanUtils.copyProperties(employee, responseDTO);
-					return responseDTO;
-				});
-
+	public Page<EmployeeResponseDTO> getAllEmployeesPaginationAndSorting(int page, int size, String field) {
+		//fetch the page of employees by paging and sorting
+		Page<Employee> employeesPage = employeeRepository.findAll(PageRequest.of(page, size).withSort(Sort.by(field)));
+		if (employeesPage == null || employeesPage.isEmpty()) {
+			// Return an empty page
+			return Page.empty();
+		}
+		return EmployeeHelper.mapEmployeePageToResponsePage(employeesPage);
 	}
 
 
 	//method to update employee from db
 	@Override
 	public EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) {
-		Employee employee = employeeRepository.findById(id).get();
+		//fetch the employee data from DB
+		Optional<Employee> optionalEmployee = employeeRepository.findById(id);
+		//check employee is present or not
+		if (optionalEmployee.isPresent()) {
+			Employee employee = optionalEmployee.get();
 
-		employee.setFirstName(requestDTO.getFirstName());
-		employee.setLastName(requestDTO.getLastName());
-		employee.setAge(requestDTO.getAge());
-		employee.setDepartment(requestDTO.getDepartment());
-		employee.setSalary(requestDTO.getSalary());
+			// Update employee details directly without using BeanUtils
+			employee.setFirstName(requestDTO.getFirstName());
+			employee.setLastName(requestDTO.getLastName());
+			employee.setAge(requestDTO.getAge());
+			employee.setDepartment(requestDTO.getDepartment());
+			employee.setSalary(requestDTO.getSalary());
 
-		BeanUtils.copyProperties(employee, requestDTO);
-		Employee savedEmployee = employeeRepository.save(employee);
+			// Save the updated employee
+			Employee savedEmployee = employeeRepository.save(employee);
 
-		EmployeeResponseDTO responseDTO = new EmployeeResponseDTO();
-		BeanUtils.copyProperties(savedEmployee, responseDTO);
-		return responseDTO;
-
-
+			return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
+		} else {
+			// Handle the case where the employee with the given ID is not found
+			throw new EmployeeNotFoundException("Employee with ID " + id + " not found");
+		}
 	}
 
+	//check for duplicate email
+	public void checkForDuplicateEmail(String email) throws DuplicateEntityException {
+		//check email is already present or not
+		if (employeeRepository.existsByEmail(email)) {
+			//Handle the case where the employee with the given email is already exist
+			throw new DuplicateEntityException("Email is already present");
+		}
+	}
 
-
-
-
-
-
-
+	//check for duplicate phonenumber
+	public void checkForDuplicatePhoneNumber(String phoneNumber) throws DuplicateEntityException {
+		//check mobileNumber is already present or not
+		if (employeeRepository.existsByPhoneNumber(phoneNumber)) {
+			//Handle the case where the employee with the given mobileNumber is already exist
+			throw new DuplicateEntityException("Phone number is already present");
+		}
+	}
 }

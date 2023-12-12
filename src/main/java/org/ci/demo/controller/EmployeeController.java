@@ -64,9 +64,9 @@ public class EmployeeController {
 	@GetMapping("/pagingAndSorting")
 	public ResponseEntity<Page<EmployeeResponseDTO>> getAllEmployeesPaginationandsorting(
 			@RequestParam(defaultValue = "0") int page,
-			 @RequestParam(defaultValue = "10")int size,
+			@RequestParam(defaultValue = "10")int size,
 			@RequestParam String field) {
-		Page<EmployeeResponseDTO> responseDTOList = employeeService.getAllEmployeespaginationandSorting(page, size, field);
+		Page<EmployeeResponseDTO> responseDTOList = employeeService.getAllEmployeesPaginationAndSorting(page, size,field);
 		//return employeeResponse and capture the status code
 		return new ResponseEntity<>(responseDTOList, HttpStatus.OK);
 	}
