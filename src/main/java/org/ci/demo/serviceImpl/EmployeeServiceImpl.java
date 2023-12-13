@@ -126,7 +126,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	}
 
 	//check for duplicate email
-	public void checkForDuplicateEmail(String email) throws DuplicateEntityException {
+	private void checkForDuplicateEmail(String email) throws DuplicateEntityException {
 		//check email is already present or not
 		if (employeeRepository.existsByEmail(email)) {
 			//Handle the case where the employee with the given email is already exist
@@ -135,7 +135,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 	}
 
 	//check for duplicate phonenumber
-	public void checkForDuplicatePhoneNumber(String phoneNumber) throws DuplicateEntityException {
+	private void checkForDuplicatePhoneNumber(String phoneNumber) throws DuplicateEntityException {
 		//check mobileNumber is already present or not
 		if (employeeRepository.existsByPhoneNumber(phoneNumber)) {
 			//Handle the case where the employee with the given mobileNumber is already exist
