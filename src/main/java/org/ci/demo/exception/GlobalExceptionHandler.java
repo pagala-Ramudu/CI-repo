@@ -25,6 +25,11 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException e) {
 		return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
 	}
+
+	@ExceptionHandler(DuplicateEntityException.class)
+	public ResponseEntity<String> handleDuplicateEntityException(DuplicateEntityException e) {
+		return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+	}
 	
 	
 	@ExceptionHandler(EmployeeNotFoundException.class)

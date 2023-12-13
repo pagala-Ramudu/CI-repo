@@ -1,13 +1,10 @@
 package org.ci.demo.dto;
 
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
+
 import lombok.Data;
+
+import javax.persistence.Column;
+import javax.validation.constraints.*;
 
 @Data
 public class EmployeeRequestDTO {

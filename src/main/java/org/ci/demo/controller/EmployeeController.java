@@ -7,13 +7,12 @@ import org.ci.demo.exception.DuplicateEntityException;
 import org.ci.demo.serviceImpl.EmployeeServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 
+import javax.validation.*;
 import java.util.List;
 
 @RestController
@@ -75,14 +74,20 @@ public class EmployeeController {
 	//method to update employee
 	@PutMapping("/update/{id}")
 	public ResponseEntity<EmployeeResponseDTO>updateEmployee(
-			@PathVariable long id, @RequestBody EmployeeRequestDTO requestDTO) {
+			@PathVariable long id, @RequestBody EmployeeRequestDTO requestDTO) throws DuplicateEntityException {
 		EmployeeResponseDTO responseDTOList = employeeService.updateEmployee(id, requestDTO);
 		//return employeeResponse and capture the status code
 		return new ResponseEntity<>(responseDTOList, HttpStatus.OK);
 	}
 
+	//method to delete employee by id
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteEmployee(@PathVariable long id){
 
-	
+		employeeService.deleteEmployeeById(id);
+
+		return ResponseEntity.ok("User deleted Successfulyy");
+	}
 
 
 }

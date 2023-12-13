@@ -67,9 +67,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		}
 		//convert the employee to employeeResponseDTO and return the list of employees
 		return employees.stream()
-				.map(employee -> {
-					return EmployeeHelper.mapEmployeeToResponseDTO(employee);
-				})
+				.map(EmployeeHelper::mapEmployeeToResponseDTO)
 				.collect(Collectors.toList());
 	}
 
@@ -101,29 +99,40 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	//method to update employee from db
 	@Override
-	public EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) {
-		//fetch the employee data from DB
-		Optional<Employee> optionalEmployee = employeeRepository.findById(id);
-		//check employee is present or not
-		if (optionalEmployee.isPresent()) {
-			Employee employee = optionalEmployee.get();
+	public EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException {
+		// Fetch the employee data from DB
+		Employee employee = employeeRepository.findById(id)
+				.orElseThrow(() -> new EmployeeNotFoundException("Employee with ID " + id + " not found"));
 
-			// Update employee details directly without using BeanUtils
-			employee.setFirstName(requestDTO.getFirstName());
-			employee.setLastName(requestDTO.getLastName());
-			employee.setAge(requestDTO.getAge());
-			employee.setDepartment(requestDTO.getDepartment());
-			employee.setSalary(requestDTO.getSalary());
+		// Check for duplicate email or phone number
+		//validateAndUpdateDuplicates(id, requestDTO);
+		checkForDuplicateEmail(requestDTO.getEmail());
+		checkForDuplicatePhoneNumber(requestDTO.getPhoneNumber());
 
-			// Save the updated employee
-			Employee savedEmployee = employeeRepository.save(employee);
 
-			return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
-		} else {
-			// Handle the case where the employee with the given ID is not found
-			throw new EmployeeNotFoundException("Employee with ID " + id + " not found");
-		}
+		// Update employee details directly without using BeanUtils
+		employee.setFirstName(requestDTO.getFirstName());
+		employee.setLastName(requestDTO.getLastName());
+		employee.setAge(requestDTO.getAge());
+		employee.setDepartment(requestDTO.getDepartment());
+		employee.setSalary(requestDTO.getSalary());
+
+		// Save the updated employee
+		Employee savedEmployee = employeeRepository.save(employee);
+
+		return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
 	}
+
+	//delete employee by id
+	@Override
+	public void deleteEmployeeById(long id) {
+		if (!employeeRepository.existsById(id)) {
+			throw new EmployeeNotFoundException("User not found with ID: " +id);
+		}
+		employeeRepository.deleteById(id);
+	}
+
+
 
 	//check for duplicate email
 	private void checkForDuplicateEmail(String email) throws DuplicateEntityException {
@@ -142,4 +151,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 			throw new DuplicateEntityException("Phone number is already present");
 		}
 	}
+
+
+
 }
