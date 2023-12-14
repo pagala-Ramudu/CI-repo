@@ -3,12 +3,10 @@ package org.ci.demo.serviceImpl;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.ci.demo.dto.EmployeeRequestDTO;
 import org.ci.demo.dto.EmployeeResponseDTO;
-import org.ci.demo.dto.EmployeeUpdateRequestDTO;
 import org.ci.demo.entity.Employee;
 import org.ci.demo.exception.DuplicateEntityException;
 import org.ci.demo.exception.EmployeeNotFoundException;
@@ -100,17 +98,19 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	//method to update employee from db
 	@Override
-	public EmployeeResponseDTO updateEmployee(long id, EmployeeUpdateRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException {
+	public EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException {
 		// Fetch the employee data from DB
 		Employee employee = employeeRepository.findById(id)
 				.orElseThrow(() -> new EmployeeNotFoundException("Employee with ID " + id + " not found"));
 
-		// Update employee details directly without using BeanUtils
+		// Update employee details
 		employee.setFirstName(requestDTO.getFirstName());
 		employee.setLastName(requestDTO.getLastName());
 		employee.setAge(requestDTO.getAge());
 		employee.setDepartment(requestDTO.getDepartment());
 		employee.setSalary(requestDTO.getSalary());
+		employee.setEmail(requestDTO.getEmail());
+		employee.setPhoneNumber(requestDTO.getPhoneNumber());
 
 		// Save the updated employee
 		Employee savedEmployee = employeeRepository.save(employee);
