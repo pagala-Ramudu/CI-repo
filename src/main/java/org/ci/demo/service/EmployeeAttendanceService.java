@@ -1,5 +1,6 @@
 package org.ci.demo.service;
 
+import org.ci.demo.dto.EmployeeAttandanceUpdateRequestDTO;
 import org.ci.demo.dto.EmployeeAttendanceRequestDTO;
 import org.ci.demo.dto.EmployeeAttendanceResponseDTO;
 import org.ci.demo.exception.DuplicateEntityException;
@@ -16,7 +17,7 @@ public interface EmployeeAttendanceService {
 
     EmployeeAttendanceResponseDTO addEmployeeAttendance(EmployeeAttendanceRequestDTO requestDTO) throws DuplicateEntityException;
 
-    EmployeeAttendanceResponseDTO editEmployeeAttendance(Long emaId, EmployeeAttendanceRequestDTO requestDTO) throws DuplicateEntityException;
+    EmployeeAttendanceResponseDTO editEmployeeAttendance(Long emaId, EmployeeAttandanceUpdateRequestDTO requestDTO) throws DuplicateEntityException;
 
     void deleteEmployeeAttendance(Long emaId);
 }

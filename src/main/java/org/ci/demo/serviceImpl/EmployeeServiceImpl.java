@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.ci.demo.dto.EmployeeRequestDTO;
 import org.ci.demo.dto.EmployeeResponseDTO;
+import org.ci.demo.dto.EmployeeUpdateRequestDTO;
 import org.ci.demo.entity.Employee;
 import org.ci.demo.exception.DuplicateEntityException;
 import org.ci.demo.exception.EmployeeNotFoundException;
@@ -99,16 +100,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	//method to update employee from db
 	@Override
-	public EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException {
+	public EmployeeResponseDTO updateEmployee(long id, EmployeeUpdateRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException {
 		// Fetch the employee data from DB
 		Employee employee = employeeRepository.findById(id)
 				.orElseThrow(() -> new EmployeeNotFoundException("Employee with ID " + id + " not found"));
-
-		// Check for duplicate email or phone number
-		//validateAndUpdateDuplicates(id, requestDTO);
-		checkForDuplicateEmail(requestDTO.getEmail());
-		checkForDuplicatePhoneNumber(requestDTO.getPhoneNumber());
-
 
 		// Update employee details directly without using BeanUtils
 		employee.setFirstName(requestDTO.getFirstName());

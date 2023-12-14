@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.ci.demo.dto.EmployeeRequestDTO;
 import org.ci.demo.dto.EmployeeResponseDTO;
+import org.ci.demo.dto.EmployeeUpdateRequestDTO;
 import org.ci.demo.exception.DuplicateEntityException;
 import org.ci.demo.exception.EmployeeNotFoundException;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,7 @@ public interface EmployeeService {
 
 	 Page<EmployeeResponseDTO> getAllEmployeesPaginationAndSorting(int page, int size, String field);
 
-	EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException;
+	EmployeeResponseDTO updateEmployee(long id, EmployeeUpdateRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException;
 
 	void deleteEmployeeById(long id);
 

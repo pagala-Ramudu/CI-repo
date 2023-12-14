@@ -3,6 +3,7 @@ package org.ci.demo.controller;
 
 import org.ci.demo.dto.EmployeeRequestDTO;
 import org.ci.demo.dto.EmployeeResponseDTO;
+import org.ci.demo.dto.EmployeeUpdateRequestDTO;
 import org.ci.demo.exception.DuplicateEntityException;
 import org.ci.demo.serviceImpl.EmployeeServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,7 @@ public class EmployeeController {
 	//method to update employee
 	@PutMapping("/update/{id}")
 	public ResponseEntity<EmployeeResponseDTO>updateEmployee(
-			@PathVariable long id, @RequestBody EmployeeRequestDTO requestDTO) throws DuplicateEntityException {
+			@PathVariable long id, @RequestBody EmployeeUpdateRequestDTO requestDTO) throws DuplicateEntityException {
 		EmployeeResponseDTO responseDTOList = employeeService.updateEmployee(id, requestDTO);
 		//return employeeResponse and capture the status code
 		return new ResponseEntity<>(responseDTOList, HttpStatus.OK);

@@ -15,7 +15,7 @@ public class EmployeeAttendanceResponseDTO {
 
     private Long emaId;
     private Long emaEmployeeId;
-    private LocalDate ema_date;
+    private LocalDate emaDate;
     private AttendanceStatus emaAttendanceStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

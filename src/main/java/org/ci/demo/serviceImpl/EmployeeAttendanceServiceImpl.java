@@ -1,5 +1,6 @@
 package org.ci.demo.serviceImpl;
 
+import org.ci.demo.dto.EmployeeAttandanceUpdateRequestDTO;
 import org.ci.demo.dto.EmployeeAttendanceRequestDTO;
 import org.ci.demo.dto.EmployeeAttendanceResponseDTO;
 
@@ -23,6 +24,7 @@ public class EmployeeAttendanceServiceImpl implements EmployeeAttendanceService 
     @Autowired
     private  EmployeeAttendanceRepository attendanceRepository;
 
+    //method to addEmployeeAttendance
     @Override
     public EmployeeAttendanceResponseDTO addEmployeeAttendance(EmployeeAttendanceRequestDTO requestDTO) throws DuplicateEntityException {
         // Check for duplicate getEma_employeeId
@@ -32,65 +34,77 @@ public class EmployeeAttendanceServiceImpl implements EmployeeAttendanceService 
         attendance.setCreatedAt(LocalDateTime.now());
         attendance.setUpdatedAt(LocalDateTime.now());
         EmployeeAttendance savedAttendance = attendanceRepository.save(attendance);
+
+        //returnemployeeAttandance reponse
         return mapToResponseDTO(savedAttendance);
     }
 
 
+    //method to get page of employeeAttance
     @Override
-    public Page<EmployeeAttendanceResponseDTO> listEmployeeAttendance(@RequestParam(defaultValue = "0") int page,
-                                                                      @RequestParam(defaultValue = "10") int size) {
+    public Page<EmployeeAttendanceResponseDTO> listEmployeeAttendance( int page, int size) {
         Page<EmployeeAttendance> employeeAttendances = attendanceRepository.findAll(PageRequest.of(page, size));
+        //check nulls are present or not
         if(employeeAttendances==null && employeeAttendances.isEmpty()){
             // Return an empty page
             return Page.empty();
         }
+        //return employeeAttandance response
         return mapEmployeeToEmployeeResponsePage(employeeAttendances);
     }
 
+    //get employeeAttandance by emaId
     @Override
     public EmployeeAttendanceResponseDTO getEmployeeAttendanceDetails(Long emaId) {
         EmployeeAttendance attendance = attendanceRepository.findById(emaId)
+                //throwing an exception if id not present
                 .orElseThrow(() -> new EmployeeNotFoundException("employee not found with id" +emaId));
+        //return employeeAttandace
         return mapToResponseDTO(attendance);
     }
 
+    //method to edit employeeAttandance
     @Override
-    public EmployeeAttendanceResponseDTO editEmployeeAttendance(Long emaId, EmployeeAttendanceRequestDTO requestDTO) throws DuplicateEntityException {
+    public EmployeeAttendanceResponseDTO editEmployeeAttendance(Long emaId, EmployeeAttandanceUpdateRequestDTO requestDTO) throws DuplicateEntityException {
+
         EmployeeAttendance existingAttendance = attendanceRepository.findById(emaId)
                 .orElseThrow(() -> new EmployeeNotFoundException("Employee with ID " + emaId));
 
-        checkForDuplicateEmployeeId(requestDTO.getEmaemployeeId());
-
         // Update employee details directly without using BeanUtils
-            existingAttendance.setEmaEmployeeId(requestDTO.getEmaemployeeId());
-            existingAttendance.setEmaDate(requestDTO.getEmaDate());
-            existingAttendance.setEmaAttendanceStatus(requestDTO.getEmaAttendanceStatus());
-            existingAttendance.setUpdatedAt(LocalDateTime.now());
+        existingAttendance.setEmaDate(requestDTO.getEmaDate());
+        existingAttendance.setEmaAttendanceStatus(requestDTO.getEmaAttendanceStatus());
+        existingAttendance.setUpdatedAt(LocalDateTime.now());
 
-            EmployeeAttendance updatedAttendance = attendanceRepository.save(existingAttendance);
-            return mapToResponseDTO(updatedAttendance);
+        //save updated attandance in DB
+        EmployeeAttendance updatedAttendance = attendanceRepository.save(existingAttendance);
 
+        //return updated employeeAttandace
+        return mapToResponseDTO(updatedAttendance);
     }
 
+    //method to delete employeeAttandance
     @Override
     public void deleteEmployeeAttendance(Long emaId) {
+        //check employee is exist or not
         if (!attendanceRepository.existsById(emaId)) {
             throw new EmployeeNotFoundException("User not found with ID: " +emaId);
         }
         attendanceRepository.deleteById(emaId);
     }
 
+    //convert employeeAttandace to responseDTO
     private EmployeeAttendanceResponseDTO mapToResponseDTO(EmployeeAttendance attendance) {
         EmployeeAttendanceResponseDTO responseDTO = new EmployeeAttendanceResponseDTO();
         responseDTO.setEmaId(attendance.getEmaId());
         responseDTO.setEmaEmployeeId(attendance.getEmaEmployeeId());
-        responseDTO.setEma_date(attendance.getEmaDate());
+        responseDTO.setEmaDate(attendance.getEmaDate());
         responseDTO.setEmaAttendanceStatus(attendance.getEmaAttendanceStatus());
         responseDTO.setCreatedAt(attendance.getCreatedAt());
         responseDTO.setUpdatedAt(attendance.getUpdatedAt());
         return responseDTO;
     }
 
+    //convert to entity
     private EmployeeAttendance mapToEntity(EmployeeAttendanceRequestDTO requestDTO) {
         EmployeeAttendance attendance = new EmployeeAttendance();
         attendance.setEmaEmployeeId(requestDTO.getEmaemployeeId());
@@ -99,6 +113,7 @@ public class EmployeeAttendanceServiceImpl implements EmployeeAttendanceService 
         return attendance;
     }
 
+    //convert page of EmployeeAttendance to page of EmployeeAttendanceResponseDTO
     public static Page<EmployeeAttendanceResponseDTO> mapEmployeeToEmployeeResponsePage(Page<EmployeeAttendance> employeePage) {
         return employeePage.map(employeeAttendance -> {
             EmployeeAttendanceResponseDTO responseDTO = new EmployeeAttendanceResponseDTO();
@@ -107,7 +122,7 @@ public class EmployeeAttendanceServiceImpl implements EmployeeAttendanceService 
         });
     }
 
-
+    //method to check ema_employeeId is already present or not
     private void checkForDuplicateEmployeeId(long ema_employeeId) throws DuplicateEntityException {
         //check ema_employeeId is already present or not
         if (attendanceRepository.existsByEmaEmployeeId(ema_employeeId)) {

@@ -1,5 +1,6 @@
 package org.ci.demo.controller;
 
+import org.ci.demo.dto.EmployeeAttandanceUpdateRequestDTO;
 import org.ci.demo.dto.EmployeeAttendanceRequestDTO;
 import org.ci.demo.dto.EmployeeAttendanceResponseDTO;
 import org.ci.demo.exception.DuplicateEntityException;
@@ -41,7 +42,7 @@ public class EmployeeAttendanceController {
 
     @PutMapping("/{emaId}")
     public ResponseEntity<EmployeeAttendanceResponseDTO> editEmployeeAttendance(
-            @PathVariable Long emaId, @RequestBody EmployeeAttendanceRequestDTO requestDTO) throws DuplicateEntityException {
+            @PathVariable Long emaId, @RequestBody EmployeeAttandanceUpdateRequestDTO requestDTO) throws DuplicateEntityException {
         EmployeeAttendanceResponseDTO updatedAttendance = attendanceService.editEmployeeAttendance(emaId, requestDTO);
         return ResponseEntity.ok(updatedAttendance);
     }
