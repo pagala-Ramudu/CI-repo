@@ -63,8 +63,7 @@ public class EmployeeController {
         return new ResponseEntity<>(responseDTOList, HttpStatus.OK);
     }
 
-
-    //method to update employee
+    //update employee
     @PutMapping("/update/{id}")
     public ResponseEntity<EmployeeResponseDTO> updateEmployee(
             @PathVariable long id, @RequestBody EmployeeRequestDTO requestDTO) throws DuplicateEntityException {

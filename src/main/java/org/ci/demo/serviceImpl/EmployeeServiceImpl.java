@@ -10,6 +10,7 @@ import org.ci.demo.dto.EmployeeResponseDTO;
 import org.ci.demo.entity.Employee;
 import org.ci.demo.exception.DuplicateEntityException;
 import org.ci.demo.exception.EmployeeNotFoundException;
+import org.ci.demo.exception.InvalidRequestException;
 import org.ci.demo.exception.ResourceNotFoundException;
 import org.ci.demo.helper.EmployeeHelper;
 import org.ci.demo.repository.EmployeeRepository;
@@ -37,7 +38,50 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //create employee object and copy properties from requestDTO to employee
         Employee employee = new Employee();
-        BeanUtils.copyProperties(requestDTO, employee);
+
+        // Update employee details
+        if (requestDTO.getFirstName() != null) {
+            employee.setFirstName(requestDTO.getFirstName());
+        } else {
+            throw new InvalidRequestException("firstname field must be provided for update");
+        }
+
+        if (requestDTO.getEmail() != null) {
+            employee.setEmail(requestDTO.getEmail());
+        } else {
+            throw new InvalidRequestException("email field must be provided for update");
+        }
+
+        if (requestDTO.getPhoneNumber() != null) {
+            employee.setPhoneNumber(requestDTO.getPhoneNumber());
+        } else {
+            throw new InvalidRequestException("PhoneNumber field must be provided for update");
+        }
+
+        if (requestDTO.getLastName() != null) {
+            employee.setLastName(requestDTO.getLastName());
+        } else {
+            throw new InvalidRequestException("lastname field must be provided for update");
+        }
+
+        if (requestDTO.getAge() != 0) {
+            employee.setAge(requestDTO.getAge());
+        } else {
+            throw new InvalidRequestException("age fields must be provided for update");
+        }
+
+        if (requestDTO.getSalary() != 0) {
+            employee.setSalary(requestDTO.getSalary());
+        } else {
+            throw new InvalidRequestException("salary fields must be provided for update");
+        }
+
+
+        if (requestDTO.getDepartment() != null) {
+            employee.setDepartment(requestDTO.getDepartment());
+        } else {
+            throw new InvalidRequestException("department fields must be provided for update");
+        }
 
         //save an employee into DB
         Employee savedEmployee = employeeRepository.save(employee);
@@ -101,29 +145,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         return EmployeeHelper.mapEmployeePageToResponsePage(employeesPage);
     }
 
-
-    //method to update employee from db
-    @Override
-    public EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException {
-
-        // Fetch the employee data from DB
-        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Employee with ID " + id + " not found"));
-
-        // Update employee details
-        employee.setFirstName(requestDTO.getFirstName());
-        employee.setLastName(requestDTO.getLastName());
-        employee.setAge(requestDTO.getAge());
-        employee.setDepartment(requestDTO.getDepartment());
-        employee.setSalary(requestDTO.getSalary());
-        employee.setEmail(requestDTO.getEmail());
-        employee.setPhoneNumber(requestDTO.getPhoneNumber());
-
-        // Save the updated employee
-        Employee savedEmployee = employeeRepository.save(employee);
-
-        return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
-    }
-
     //delete employee by id
     @Override
     public void deleteEmployeeById(long id) {
@@ -133,6 +154,86 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.deleteById(id);
     }
 
+    @Override
+    public EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) throws EmployeeNotFoundException, InvalidRequestException, DuplicateEntityException {
+
+        // Fetch the employee data from DB
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Employee with ID " + id + " not found"));
+
+        // Update employee details
+        if (requestDTO.getFirstName() != null) {
+            checkForDuplicateFirstName(requestDTO.getFirstName(), id);
+            employee.setFirstName(requestDTO.getFirstName());
+        } else {
+            throw new InvalidRequestException("firstname field must be provided for update");
+        }
+
+        if (requestDTO.getEmail() != null) {
+            checkForDuplicateEmail(requestDTO.getEmail(), id);
+            employee.setEmail(requestDTO.getEmail());
+        } else {
+            throw new InvalidRequestException("email field must be provided for update");
+        }
+
+        if (requestDTO.getPhoneNumber() != null) {
+            checkForDuplicatePhoneNumber(requestDTO.getPhoneNumber(), id);
+            employee.setPhoneNumber(requestDTO.getPhoneNumber());
+        } else {
+            throw new InvalidRequestException("PhoneNumber field must be provided for update");
+        }
+
+        if (requestDTO.getLastName() != null) {
+            employee.setLastName(requestDTO.getLastName());
+        } else {
+            throw new InvalidRequestException("lastname field must be provided for update");
+        }
+
+        if (requestDTO.getAge() != 0) {
+            employee.setAge(requestDTO.getAge());
+        } else {
+            throw new InvalidRequestException("age fields must be provided for update");
+        }
+
+        if (requestDTO.getSalary() != 0) {
+            employee.setSalary(requestDTO.getSalary());
+        } else {
+            throw new InvalidRequestException("salary fields must be provided for update");
+        }
+
+        if (requestDTO.getDepartment() != null) {
+            employee.setDepartment(requestDTO.getDepartment());
+        } else {
+            throw new InvalidRequestException("department fields must be provided for update");
+        }
+
+
+
+        // Save the updated employee
+        Employee savedEmployee = employeeRepository.save(employee);
+
+        return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
+    }
+
+    private void checkForDuplicatePhoneNumber(String phoneNumber, long currentEmployeeId) throws DuplicateEntityException {
+        Employee existingEmployee = employeeRepository.findByPhoneNumber(phoneNumber);
+        if (existingEmployee != null && existingEmployee.getId() != currentEmployeeId) {
+            throw new DuplicateEntityException("Phone number " + phoneNumber + " is already associated with another employee");
+        }
+    }
+
+    private void checkForDuplicateEmail(String email, long currentEmployeeId) throws DuplicateEntityException {
+        Employee existingEmployee = employeeRepository.findByEmail(email);
+        if (existingEmployee != null && existingEmployee.getId() != currentEmployeeId) {
+            throw new DuplicateEntityException("Email " + email + " is already associated with another employee");
+        }
+    }
+
+    private void checkForDuplicateFirstName(String firstName, long currentEmployeeId) throws DuplicateEntityException {
+        Employee existingEmployee = employeeRepository.findByFirstName(firstName);
+        if (existingEmployee != null && existingEmployee.getId() != currentEmployeeId) {
+            throw new DuplicateEntityException("First name " + firstName + " is already associated with another employee");
+        }
+    }
 
     //check for duplicate email
     private void checkForDuplicateEmail(String email) throws DuplicateEntityException {
@@ -152,6 +253,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
     }
+
 
 
 }
