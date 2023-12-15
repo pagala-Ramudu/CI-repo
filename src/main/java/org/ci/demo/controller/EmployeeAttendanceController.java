@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class EmployeeAttendanceController {
 
     @Autowired
-    private  EmployeeAttendanceService attendanceService;
-
-
+    private EmployeeAttendanceService attendanceService;
 
     @GetMapping
     public ResponseEntity<Page<EmployeeAttendanceResponseDTO>> listEmployeeAttendance(@RequestParam(defaultValue = "0") int page,
@@ -27,6 +25,7 @@ public class EmployeeAttendanceController {
         Page<EmployeeAttendanceResponseDTO> attendanceList = attendanceService.listEmployeeAttendance(page, size);
         return ResponseEntity.ok(attendanceList);
     }
+
     @GetMapping("/{emaId}")
     public ResponseEntity<EmployeeAttendanceResponseDTO> getEmployeeAttendanceDetails(@PathVariable Long emaId) {
         EmployeeAttendanceResponseDTO attendanceDetails = attendanceService.getEmployeeAttendanceDetails(emaId);
@@ -52,4 +51,5 @@ public class EmployeeAttendanceController {
         attendanceService.deleteEmployeeAttendance(emaId);
         return ResponseEntity.noContent().build();
     }
+
 }

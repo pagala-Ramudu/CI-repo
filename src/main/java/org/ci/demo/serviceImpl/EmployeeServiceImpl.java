@@ -24,129 +24,134 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
-	@Autowired
-	private EmployeeRepository employeeRepository;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
-	//method to save employee in DB
-	@Override
-	public EmployeeResponseDTO createEmployee(EmployeeRequestDTO requestDTO) throws DuplicateEntityException {
-		// Check for duplicate email or phone number
-		checkForDuplicateEmail(requestDTO.getEmail());
-		checkForDuplicatePhoneNumber(requestDTO.getPhoneNumber());
+    //method to save employee in DB
+    @Override
+    public EmployeeResponseDTO createEmployee(EmployeeRequestDTO requestDTO) throws DuplicateEntityException {
 
-		//create employee object and copy properties from requestDTO to employee
-		Employee employee = new Employee();
-		BeanUtils.copyProperties(requestDTO, employee);
+        // Check for duplicate email or phone number
+        checkForDuplicateEmail(requestDTO.getEmail());
+        checkForDuplicatePhoneNumber(requestDTO.getPhoneNumber());
 
-		//save an employee into DB
-		Employee savedEmployee = employeeRepository.save(employee);
-		return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
-	}
+        //create employee object and copy properties from requestDTO to employee
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(requestDTO, employee);
 
-	//get employee by id method
-	@Override
-	public EmployeeResponseDTO getEmployeeById(Long id) {
-		//fetch employee data from the DB by employee id
-		Employee employee = employeeRepository.findById(id)
-				//throw an exception if employee is not present
-				.orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
-		//return employeeResponseDTO
-		return EmployeeHelper.mapEmployeeToResponseDTO(employee);
-	}
+        //save an employee into DB
+        Employee savedEmployee = employeeRepository.save(employee);
+        return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
+    }
 
-	//method to get list of employees
-	@Override
-	public List<EmployeeResponseDTO> getAllEmployees() {
-		//fetch list of employees data from DB
-		List<Employee> employees = employeeRepository.findAll();
+    //get employee by id method
+    @Override
+    public EmployeeResponseDTO getEmployeeById(Long id) {
 
-		// Handle the case where no employees are present, for example, return an empty list
-		if (employees == null || employees.isEmpty()) {
-			return Collections.emptyList();
-		}
-		//convert the employee to employeeResponseDTO and return the list of employees
-		return employees.stream()
-				.map(EmployeeHelper::mapEmployeeToResponseDTO)
-				.collect(Collectors.toList());
-	}
+        //fetch employee data from the DB by employee id
+        Employee employee = employeeRepository.findById(id)
 
-	//method to implement pagination
-	@Override
-	public Page<EmployeeResponseDTO> getAllEmployeesPaged(int page, int size) {
-		Page<Employee> employeesPage = employeeRepository.findAll(PageRequest.of(page, size));
+                //throw an exception if employee is not present
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
 
-		if (employeesPage == null || employeesPage.isEmpty()) {
-			// Return an empty page
-			return Page.empty();
-		}
-		//return page of employees
-		return EmployeeHelper.mapEmployeePageToResponsePage(employeesPage);
-	}
+        //return employeeResponseDTO
+        return EmployeeHelper.mapEmployeeToResponseDTO(employee);
+    }
 
-	//method to implement pagination and sorting
-	@Override
-	public Page<EmployeeResponseDTO> getAllEmployeesPaginationAndSorting(int page, int size, String field) {
-		//fetch the page of employees by paging and sorting
-		Page<Employee> employeesPage = employeeRepository.findAll(PageRequest.of(page, size).withSort(Sort.by(field)));
-		if (employeesPage == null || employeesPage.isEmpty()) {
-			// Return an empty page
-			return Page.empty();
-		}
-		return EmployeeHelper.mapEmployeePageToResponsePage(employeesPage);
-	}
+    //method to get list of employees
+    @Override
+    public List<EmployeeResponseDTO> getAllEmployees() {
 
+        //fetch list of employees data from DB
+        List<Employee> employees = employeeRepository.findAll();
 
-	//method to update employee from db
-	@Override
-	public EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException {
-		// Fetch the employee data from DB
-		Employee employee = employeeRepository.findById(id)
-				.orElseThrow(() -> new EmployeeNotFoundException("Employee with ID " + id + " not found"));
+        // Handle the case where no employees are present, for example, return an empty list
+        if (employees == null || employees.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-		// Update employee details
-		employee.setFirstName(requestDTO.getFirstName());
-		employee.setLastName(requestDTO.getLastName());
-		employee.setAge(requestDTO.getAge());
-		employee.setDepartment(requestDTO.getDepartment());
-		employee.setSalary(requestDTO.getSalary());
-		employee.setEmail(requestDTO.getEmail());
-		employee.setPhoneNumber(requestDTO.getPhoneNumber());
+        //convert the employee to employeeResponseDTO and return the list of employees
+        return employees.stream().map(EmployeeHelper::mapEmployeeToResponseDTO).collect(Collectors.toList());
+    }
 
-		// Save the updated employee
-		Employee savedEmployee = employeeRepository.save(employee);
+    //method to implement pagination
+    @Override
+    public Page<EmployeeResponseDTO> getAllEmployeesPaged(int page, int size) {
+        Page<Employee> employeesPage = employeeRepository.findAll(PageRequest.of(page, size));
 
-		return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
-	}
+        // check employees are null or empty
+        if (employeesPage == null || employeesPage.isEmpty()) {
+            return Page.empty();
+        }
+        //return page of employees
+        return EmployeeHelper.mapEmployeePageToResponsePage(employeesPage);
+    }
 
-	//delete employee by id
-	@Override
-	public void deleteEmployeeById(long id) {
-		if (!employeeRepository.existsById(id)) {
-			throw new EmployeeNotFoundException("User not found with ID: " +id);
-		}
-		employeeRepository.deleteById(id);
-	}
+    //method to implement pagination and sorting
+    @Override
+    public Page<EmployeeResponseDTO> getAllEmployeesPaginationAndSorting(int page, int size, String field) {
+
+        //fetch the page of employees by paging and sorting
+        Page<Employee> employeesPage = employeeRepository.findAll(PageRequest.of(page, size).withSort(Sort.by(field)));
+
+        if (employeesPage == null || employeesPage.isEmpty()) {
+            // Return an empty page
+            return Page.empty();
+        }
+        return EmployeeHelper.mapEmployeePageToResponsePage(employeesPage);
+    }
 
 
+    //method to update employee from db
+    @Override
+    public EmployeeResponseDTO updateEmployee(long id, EmployeeRequestDTO requestDTO) throws EmployeeNotFoundException, DuplicateEntityException {
 
-	//check for duplicate email
-	private void checkForDuplicateEmail(String email) throws DuplicateEntityException {
-		//check email is already present or not
-		if (employeeRepository.existsByEmail(email)) {
-			//Handle the case where the employee with the given email is already exist
-			throw new DuplicateEntityException("Email is already present");
-		}
-	}
+        // Fetch the employee data from DB
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Employee with ID " + id + " not found"));
 
-	//check for duplicate phonenumber
-	private void checkForDuplicatePhoneNumber(String phoneNumber) throws DuplicateEntityException {
-		//check mobileNumber is already present or not
-		if (employeeRepository.existsByPhoneNumber(phoneNumber)) {
-			//Handle the case where the employee with the given mobileNumber is already exist
-			throw new DuplicateEntityException("Phone number is already present");
-		}
-	}
+        // Update employee details
+        employee.setFirstName(requestDTO.getFirstName());
+        employee.setLastName(requestDTO.getLastName());
+        employee.setAge(requestDTO.getAge());
+        employee.setDepartment(requestDTO.getDepartment());
+        employee.setSalary(requestDTO.getSalary());
+        employee.setEmail(requestDTO.getEmail());
+        employee.setPhoneNumber(requestDTO.getPhoneNumber());
 
+        // Save the updated employee
+        Employee savedEmployee = employeeRepository.save(employee);
+
+        return EmployeeHelper.mapEmployeeToResponseDTO(savedEmployee);
+    }
+
+    //delete employee by id
+    @Override
+    public void deleteEmployeeById(long id) {
+        if (!employeeRepository.existsById(id)) {
+            throw new EmployeeNotFoundException("User not found with ID: " + id);
+        }
+        employeeRepository.deleteById(id);
+    }
+
+
+    //check for duplicate email
+    private void checkForDuplicateEmail(String email) throws DuplicateEntityException {
+
+        //check email is already present or not
+        if (employeeRepository.existsByEmail(email)) {
+            throw new DuplicateEntityException("Email is already present");
+        }
+    }
+
+    //check for duplicate phonenumber
+    private void checkForDuplicatePhoneNumber(String phoneNumber) throws DuplicateEntityException {
+
+        //check mobileNumber is already present or not
+        if (employeeRepository.existsByPhoneNumber(phoneNumber)) {
+            throw new DuplicateEntityException("Phone number is already present");
+        }
+
+    }
 
 
 }

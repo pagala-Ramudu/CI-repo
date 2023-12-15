@@ -10,6 +10,8 @@ import java.time.LocalDate;
 
 @Data
 public class EmployeeAttandanceUpdateRequestDTO {
+
+
     @NotNull(message = "date cannot blank")
     @PastOrPresent(message = "date must be past or present")
     private LocalDate emaDate;
@@ -17,4 +19,6 @@ public class EmployeeAttandanceUpdateRequestDTO {
     @NotNull(message = "Attendance status cannot be null")
     @Pattern(regexp = "^(ABSENT|PRESENT)$", message = "Invalid attendance status")
     private AttendanceStatus emaAttendanceStatus;
+
+
 }

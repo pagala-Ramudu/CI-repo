@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EmployeeAttendanceRepository extends JpaRepository<EmployeeAttendance, Long> {
     boolean existsByEmaEmployeeId(long ema_employeeId);
+
 } 

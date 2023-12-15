@@ -9,6 +9,8 @@ import javax.persistence.*;
 @Data
 @Entity
 public class Employee {
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,5 +22,5 @@ public class Employee {
     private String department;
     private double salary;
 
-   
+
 }

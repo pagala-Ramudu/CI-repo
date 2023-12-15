@@ -20,5 +20,5 @@ public class EmployeeAttendanceResponseDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // getters and setters
+
 }

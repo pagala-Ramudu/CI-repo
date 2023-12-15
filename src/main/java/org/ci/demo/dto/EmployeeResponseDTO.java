@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class EmployeeResponseDTO {
+
     private Long id;
     private String firstName;
     private String lastName;
@@ -12,5 +13,6 @@ public class EmployeeResponseDTO {
     private double salary;
     private String phoneNumber;
     private String email;
-  
+
+
 }

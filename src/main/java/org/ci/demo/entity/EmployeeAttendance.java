@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @Table(name = "employee_attendance")
 public class EmployeeAttendance {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ema_id")
@@ -38,6 +39,7 @@ public class EmployeeAttendance {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
 
 }
 
